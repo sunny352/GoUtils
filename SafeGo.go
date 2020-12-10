@@ -56,3 +56,51 @@ func GoLoopWithLog(action func() error, logger func(err interface{})) {
 		}
 	}()
 }
+
+func GoInfinityLoop(action func() error) {
+	go func() {
+		for {
+			err := func() error {
+				defer func() {
+					if err := recover(); nil != err {
+						return
+					}
+				}()
+				for {
+					err := action()
+					if nil != err {
+						return err
+					}
+				}
+			}()
+			if nil != err {
+				break
+			}
+		}
+	}()
+}
+
+func GoInfinityLoopWithLog(action func() error, logger func(err interface{})) {
+	go func() {
+		for {
+			err := func() error {
+				defer func() {
+					if err := recover(); nil != err {
+						logger(err)
+						return
+					}
+				}()
+				for {
+					err := action()
+					if nil != err {
+						logger(err)
+						return err
+					}
+				}
+			}()
+			if nil != err {
+				break
+			}
+		}
+	}()
+}
